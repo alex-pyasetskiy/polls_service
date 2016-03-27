@@ -7,7 +7,7 @@ from .serializers import QuestionSerializer
 from .models import Question
 
 import redis
-
+import rest_api.tasks as bgtasks
 
 class BasePollViewSet(viewsets.ViewSet):
     _redis = redis.StrictRedis(host='localhost', port=6379, db=1)
@@ -151,10 +151,7 @@ class QuestionViewSet(BasePollViewSet):
         """
         question = get_object_or_404(self.queryset, pk=pk)
         choice_id = self.request.query_params.get('choice', None)
-        instance = get_object_or_404(question.choices.all(), pk=int(choice_id))
-        instance.votes += 1
-        instance.save()
-        res = self.serializer_class().to_representation(question)
-        return Response(data=res, status=status.HTTP_200_OK)
+        res = bgtasks.vote_task.delay(question.id, choice_id)
+        return Response(data=res.get(), status=status.HTTP_200_OK)
 
 
