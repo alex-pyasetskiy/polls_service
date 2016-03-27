@@ -48,25 +48,45 @@
 
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function(){
-            var vote_handler = new WebSocket("ws://localhost:8989/ws/vote");
-            vote_handler.onopen = function() {console.log("connected")};
 
-            vote_handler.onclose = function() {
-                    show_message("Closed.");
-                };
-            vote_handler.onmessage = function(message) {
-                var result = JSON.parse(message.data);
-                result['choices'].forEach(function(elem){
-                    var total = $('#total_'+String(result['id'])+'_'+String(elem['id']));
-                    total.html(String(elem['votes']));
-                })
-            };
             $('[id^=vote_btn_]').click(function(event){
                 var q = $(this).next().val();
                 var value = this.value;
-                vote_handler.send(JSON.stringify({'question_id':q, 'choice_id':value}));
-                return false;
+//                $.post("/vote",
+//                        {'question_id':q, 'choice_id':value}, function(message){
+//                        });
+//                vote_handler.send(JSON.stringify({'question_id':q, 'choice_id':value}));
+//                return false;
+                $.ajax({
+                    type: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    url: 'http://localhost:8989/vote',
+                    dataType: 'json',
+                    data: JSON.stringify({'question_id':q, 'choice_id':value}),
+                        success: function(msg){
+                    console.log('Published', msg);
+                        }
+                    });
             });
+
+
+            var event_tracker = new WebSocket("ws://localhost:8989/ws/track_events");
+
+            event_tracker.onopen = function() {
+	                console.log('Connected to track.');
+	            };
+            event_tracker.onmessage = function(message) {
+                    console.log("received", message);
+	            	var result = JSON.parse(message.data);
+                    console.log("parsed", result);
+                    result['choices'].forEach(function(elem){
+                        var total = $('#total_'+String(result['id'])+'_'+String(elem['id']));
+                        total.html(String(elem['votes']));
+                    })
+	            };
+            event_tracker.onclose = function() {
+                console.log("Closed track_events.");
+            };
 
         });
     </script>

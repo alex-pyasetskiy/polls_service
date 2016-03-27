@@ -6,16 +6,10 @@ from rest_framework.response import Response
 from .serializers import QuestionSerializer
 from .models import Question
 
-import redis
 import rest_api.tasks as bgtasks
 
-class BasePollViewSet(viewsets.ViewSet):
-    _redis = redis.StrictRedis(host='localhost', port=6379, db=1)
-    _publisher = _redis.pubsub()
-    _publisher.subscribe('client_events')
 
-
-class QuestionViewSet(BasePollViewSet):
+class QuestionViewSet(viewsets.ViewSet):
     """
     API endpoint that allows questions to be viewed or edited.
     """
@@ -104,7 +98,6 @@ class QuestionViewSet(BasePollViewSet):
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             result = Response(serializer.data, status=status.HTTP_201_CREATED)
-            self._redis.publish('events', result.data)
             return result
 
         else:
@@ -151,7 +144,7 @@ class QuestionViewSet(BasePollViewSet):
         """
         question = get_object_or_404(self.queryset, pk=pk)
         choice_id = self.request.query_params.get('choice', None)
-        res = bgtasks.vote_task.delay(question.id, choice_id)
-        return Response(data=res.get(), status=status.HTTP_200_OK)
+        bgtasks.vote_task.delay(question.id, choice_id)
+        return Response()
 
 
