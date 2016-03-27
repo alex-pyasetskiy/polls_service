@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sample test</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.css" type="text/css"/>
+    <script type="text/javascript" src="/static/js/dist/jquery.js"></script>
+    <script type="text/javascript" src="/static/js/dist/bootstrap.js"></script>
+</head>
+<body>
+    <h1>Polls list</h1>
+
+    <div class="container">
+        <div class="row" id="polls_list">
+
+            {% for question in polls_list %}
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        {{ question['question'] }} | {{question['pub_date']}}</h3>
+                </div>
+                <div class="panel-body">
+                    <ul class="list-group">
+                    {% for c in question['choices'] %}
+                        <li class="list-group-item" id="choice_{{c['id']}}">
+                            <div class="row">
+                            <div class="col-xs-4">
+                                    {{ c['choice'] }}
+                            </div>
+                            <div class="col-xs-4" id="total_{{question['id']}}_{{c['id']}}">
+                                {{ c['votes'] }}
+                            </div>
+                            <div class="col-xs-4">
+
+                                <button class="btn btn-success pull-right" id="vote_btn_{{c['id']}}" value="{{c['id']}}"> VOTE !</button>
+                                <input type="hidden" id="question_id_{{c['id']}}" value="{{question['id']}}">
+                            </div>
+                                </div>
+                        </li>
+                    {% end %}
+                        </ul>
+                </div>
+            </div>
+            {% end %}
+        </div>
+    </div>
+
+
+
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function(){
+            var vote_handler = new WebSocket("ws://localhost:8989/ws/vote");
+            vote_handler.onopen = function() {console.log("connected")};
+
+            vote_handler.onclose = function() {
+                    show_message("Closed.");
+                };
+            vote_handler.onmessage = function(message) {
+                var result = JSON.parse(message.data);
+                result['choices'].forEach(function(elem){
+                    var total = $('#total_'+String(result['id'])+'_'+String(elem['id']));
+                    total.html(String(elem['votes']));
+                })
+            };
+            $('[id^=vote_btn_]').click(function(event){
+                var q = $(this).next().val();
+                var value = this.value;
+                vote_handler.send(JSON.stringify({'question_id':q, 'choice_id':value}));
+                return false;
+            });
+
+        });
+    </script>
+</body>
+</html>

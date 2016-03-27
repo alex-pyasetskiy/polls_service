@@ -1,6 +1,8 @@
 # Byte-compiled / optimized / DLL files
 .idea/
 *.sqlite3
+bin/python
+bin/buildout
 __pycache__/
 *.py[cod]
 *$py.class
@@ -10,10 +12,12 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+bin/
 env/
 build/
 develop-eggs/
 dist/
+etc/supervisord.conf
 downloads/
 eggs/
 .eggs/
