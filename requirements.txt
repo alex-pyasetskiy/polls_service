@@ -1,0 +1,6 @@
+Django==1.9.4
+django-debug-toolbar==1.4
+django-rest-assured==0.2.0
+djangorestframework==3.3.3
+sqlparse==0.1.19
+zc.buildout==2.5.0
