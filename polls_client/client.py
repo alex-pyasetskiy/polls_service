@@ -1,4 +1,3 @@
-import redis
 import os
 import json
 from tornado.web import RequestHandler, Application
@@ -7,10 +6,6 @@ from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 import urllib.request
 import tornadoredis
-
-from listener import RedisProvider
-
-RC = redis.StrictRedis(db=2)
 
 client = tornadoredis.Client(selected_db=2)
 client.connect()
@@ -75,7 +70,6 @@ application = Application([
 
 
 if __name__ == "__main__":
-    RedisProvider(RC, ['api_events']).start()
     http_server = HTTPServer(application)
     http_server.listen(8989)
     print('Demo is runing at localhost:8989\nQuit the demo with CONTROL-C')

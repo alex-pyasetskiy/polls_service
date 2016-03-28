@@ -145,6 +145,6 @@ class QuestionViewSet(viewsets.ViewSet):
         question = get_object_or_404(self.queryset, pk=pk)
         choice_id = self.request.query_params.get('choice', None)
         bgtasks.vote_task.delay(question.id, choice_id)
-        return Response()
+        return Response(status=status.HTTP_202_ACCEPTED)
 
 
