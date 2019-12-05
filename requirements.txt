@@ -3,7 +3,7 @@ anyjson==0.3.3
 backports-abc==0.4
 billiard==3.3.0.23
 celery==3.1.23
-Django==1.9.4
+Django==1.11.23
 django-celery==3.1.17
 django-debug-toolbar==1.4
 django-filter==0.13.0
